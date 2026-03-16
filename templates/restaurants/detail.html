@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}{{ restaurant.name }} – flavor{% endblock %}
+
+{% block content %}
+
+<div class="detail-hero">
+  <div class="detail-hero-ph">🍽️</div>
+</div>
+
+<div class="detail-wrap">
+
+  <!-- LEFT COLUMN: restaurant info + reviews -->
+  <div>
+    <div class="breadcrumb">
+      <a href="{% url 'home' %}">Home</a> /
+      <a href="{% url 'restaurant_list' %}">Restaurants</a> /
+      {{ restaurant.name }}
+    </div>
+
+    <h1 class="detail-name">{{ restaurant.name }}</h1>
+
+    <div class="detail-tags">
+      <span class="tag tag-cat">{{ restaurant.category }}</span>
+      <span class="tag tag-price">{{ restaurant.price_display }}</span>
+    </div>
+
+    <p class="detail-desc">{{ restaurant.description }}</p>
+
+    <div class="info-card">
+      <h4>Details</h4>
+      <div class="info-row"><span class="info-icon">📍</span> {{ restaurant.address }}</div>
+      <div class="info-row"><span class="info-icon">🏙️</span> {{ restaurant.location }}</div>
+      <div class="info-row"><span class="info-icon">📞</span> {{ restaurant.phone }}</div>
+      <div class="info-row"><span class="info-icon">💰</span> Price range: {{ restaurant.price_display }}</div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="reviews-section">
+      <div class="reviews-title">Reviews</div>
+      {% if reviews %}
+        {% for review in reviews %}
+        <div class="review-card">
+          <div class="review-top">
+            <div class="reviewer">
+              <div class="avatar">{{ review.author|first|upper }}</div>
+              <div>
+                <div class="reviewer-name">{{ review.author }}</div>
+                <div class="reviewer-date">{{ review.created_at|date:"d M Y" }}</div>
+              </div>
+            </div>
+            <div class="review-stars">
+              {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+            </div>
+          </div>
+          <p class="review-text">{{ review.text }}</p>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty" style="padding:40px 0">
+          <div class="empty-icon">💬</div>
+          <h3>No reviews yet</h3>
+          <p>Be the first to review this restaurant.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR: rating + location -->
+  <aside>
+    <div class="info-card">
+      <div class="rating-box">
+        {% with avg=restaurant.average_rating cnt=restaurant.reviews.count %}
+        {% if avg %}
+        <div class="rating-num">{{ avg }}</div>
+        <div class="rating-stars">★★★★★</div>
+        <div class="rating-cnt">{{ cnt }} review{{ cnt|pluralize }}</div>
+        {% else %}
+        <div style="font-size:15px;color:#adadb8;padding:12px 0">Not rated yet</div>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h4>Location</h4>
+      <div class="info-row"><span class="info-icon">📍</span> {{ restaurant.address }}</div>
+      <div class="info-row"><span class="info-icon">🏙️</span> {{ restaurant.location }}</div>
+      <div class="info-row"><span class="info-icon">📞</span> {{ restaurant.phone }}</div>
+    </div>
+  </aside>
+
+</div>
+{% endblock %}

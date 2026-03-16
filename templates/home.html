@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}flavor – Discover Restaurants{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">🍽️ Your Restaurant Guide</div>
+  <h1>YER<br><span>Routes</span></h1>
+  <p>Find the best restaurants in your city, read reviews and save your favorites.</p>
+  <form class="hero-search" action="{% url 'restaurant_list' %}" method="get">
+    <input type="text" name="q" placeholder="Search by restaurant, cuisine or neighborhood...">
+    <button type="submit">Search</button>
+  </form>
+</div>
+
+{% endblock %}

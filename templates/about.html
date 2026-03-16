@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}About – flavor{% endblock %}
+{% block content %}
+<div class="section">
+  <div class="wrap" style="max-width:720px">
+    <h1 style="font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-1.5px;margin-bottom:16px">
+      Let's discover<br>great food together.
+    </h1>
+    <p style="font-size:18px;color:#6e6e73;line-height:1.7;margin-bottom:40px">
+      flavor is a restaurant discovery platform that helps you find the best dining spots in your city.
+      Browse by category, read authentic reviews, and explore new places to eat.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <div style="background:#f5f5f7;border-radius:16px;padding:28px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">🍽️</div>
+        <div style="font-weight:700;margin-bottom:6px">Discover</div>
+        <div style="font-size:14px;color:#6e6e73">Find your next favorite restaurant from thousands of options.</div>
+      </div>
+      <div style="background:#f5f5f7;border-radius:16px;padding:28px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">⭐</div>
+        <div style="font-weight:700;margin-bottom:6px">Review</div>
+        <div style="font-size:14px;color:#6e6e73">Share your experience and help the community.</div>
+      </div>
+      <div style="background:#f5f5f7;border-radius:16px;padding:28px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">📍</div>
+        <div style="font-weight:700;margin-bottom:6px">Locate</div>
+        <div style="font-size:14px;color:#6e6e73">Find the nearest great food spots around you.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
