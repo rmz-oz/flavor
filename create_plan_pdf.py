@@ -1,764 +1,518 @@
 """
-Generate flavor project – 7-Day Team Plan PDF
+flavor – 7-Day Team Plan PDF (v2)
 Run: python3 create_plan_pdf.py
 """
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, PageBreak, KeepTogether
+    HRFlowable, PageBreak
 )
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 
-W, H = A4
 OUTPUT = "/Users/ramiz/PycharmProjects/flavor/flavor_team_plan.pdf"
 
 # ── Colors ──────────────────────────────────────────────────────────────────
-ORANGE   = colors.HexColor("#ff6000")
-DARK     = colors.HexColor("#1d1d1f")
-GRAY     = colors.HexColor("#6e6e73")
-LIGHT    = colors.HexColor("#f5f5f7")
-WHITE    = colors.white
-CODE_BG  = colors.HexColor("#1e1e2e")
-CODE_FG  = colors.HexColor("#cdd6f4")
-YAREN_C  = colors.HexColor("#ff6000")
-ESIN_C   = colors.HexColor("#007aff")
-RANA_C   = colors.HexColor("#34c759")
-RAMIZ_C  = colors.HexColor("#af52de")
+ORANGE = colors.HexColor("#ff6000")
+DARK   = colors.HexColor("#1d1d1f")
+GRAY   = colors.HexColor("#6e6e73")
+LIGHT  = colors.HexColor("#f5f5f7")
+WHITE  = colors.white
+BLUE   = colors.HexColor("#007aff")
+GREEN  = colors.HexColor("#34c759")
+PURPLE = colors.HexColor("#af52de")
+BORDER = colors.HexColor("#e5e5ea")
 
-MEMBER_COLORS = {
-    "Yaren": YAREN_C,
-    "Esin":  ESIN_C,
-    "Rana":  RANA_C,
-    "Ramiz": RAMIZ_C,
-}
-MEMBER_HEX = {
-    "Yaren": "#ff6000",
-    "Esin":  "#007aff",
-    "Rana":  "#34c759",
-    "Ramiz": "#af52de",
-}
+MEMBER_HEX = {"Yaren": "#ff6000", "Esin": "#007aff", "Rana": "#34c759", "Ramiz": "#af52de"}
+MEMBER_CLR = {"Yaren": ORANGE, "Esin": BLUE, "Rana": GREEN, "Ramiz": PURPLE}
 
 # ── Styles ───────────────────────────────────────────────────────────────────
-base = getSampleStyleSheet()
-
 def S(name, **kw):
     return ParagraphStyle(name, **kw)
 
-sTitle = S("sTitle", fontSize=32, textColor=WHITE,
-           fontName="Helvetica-Bold", leading=38, spaceAfter=6, alignment=TA_CENTER)
-sSubtitle = S("sSubtitle", fontSize=14, textColor=colors.HexColor("#ffb380"),
-              fontName="Helvetica", leading=20, spaceAfter=4, alignment=TA_CENTER)
-sH1 = S("sH1", fontSize=18, textColor=DARK, fontName="Helvetica-Bold",
-        leading=24, spaceBefore=18, spaceAfter=8)
-sH2 = S("sH2", fontSize=13, textColor=DARK, fontName="Helvetica-Bold",
-        leading=18, spaceBefore=12, spaceAfter=4)
-sH3 = S("sH3", fontSize=11, textColor=GRAY, fontName="Helvetica-Bold",
-        leading=16, spaceBefore=8, spaceAfter=4)
-sBody = S("sBody", fontSize=10, textColor=DARK, fontName="Helvetica",
-          leading=16, spaceAfter=4)
-sBodyJ = S("sBodyJ", fontSize=10, textColor=DARK, fontName="Helvetica",
-           leading=16, spaceAfter=4, alignment=TA_JUSTIFY)
-sCode = S("sCode", fontSize=8.5, textColor=CODE_FG, fontName="Courier",
-          leading=13, spaceAfter=2, backColor=CODE_BG,
-          leftIndent=10, rightIndent=10)
-sSmall = S("sSmall", fontSize=9, textColor=GRAY, fontName="Helvetica",
-           leading=14, spaceAfter=2)
-sBullet = S("sBullet", fontSize=10, textColor=DARK, fontName="Helvetica",
-            leading=16, leftIndent=14, spaceAfter=3)
+sCover   = S("sCover",  fontSize=36, textColor=WHITE, fontName="Helvetica-Bold",
+             leading=42, alignment=TA_CENTER)
+sCoverSub= S("cSub",   fontSize=13, textColor=colors.HexColor("#ffb380"),
+             fontName="Helvetica", leading=20, alignment=TA_CENTER)
+sH1      = S("sH1",    fontSize=20, textColor=DARK,  fontName="Helvetica-Bold",
+             leading=26, spaceBefore=20, spaceAfter=6)
+sH2      = S("sH2",    fontSize=14, textColor=DARK,  fontName="Helvetica-Bold",
+             leading=20, spaceBefore=14, spaceAfter=5)
+sH3      = S("sH3",    fontSize=11, textColor=GRAY,  fontName="Helvetica-Bold",
+             leading=16, spaceBefore=10, spaceAfter=4)
+sBody    = S("sBody",  fontSize=10, textColor=DARK,  fontName="Helvetica",
+             leading=16, spaceAfter=4)
+sBodyJ   = S("sBodyJ", fontSize=10, textColor=DARK,  fontName="Helvetica",
+             leading=17, spaceAfter=5, alignment=TA_JUSTIFY)
+sQ       = S("sQ",     fontSize=10, textColor=ORANGE, fontName="Helvetica-Bold",
+             leading=16, spaceBefore=10, spaceAfter=3)
+sA       = S("sA",     fontSize=10, textColor=DARK,  fontName="Helvetica",
+             leading=17, spaceAfter=6, leftIndent=12, alignment=TA_JUSTIFY)
+sBullet  = S("sBullet",fontSize=10, textColor=DARK,  fontName="Helvetica",
+             leading=16, leftIndent=14, spaceAfter=3)
+sSmall   = S("sSmall", fontSize=9,  textColor=GRAY,  fontName="Helvetica",
+             leading=13, spaceAfter=2)
+sCenter  = S("sCenter",fontSize=9,  textColor=GRAY,  fontName="Helvetica",
+             leading=14, alignment=TA_CENTER)
+sTableH  = S("sTableH",fontSize=10, textColor=WHITE, fontName="Helvetica-Bold",
+             leading=14, alignment=TA_CENTER)
+sTableB  = S("sTableB",fontSize=10, textColor=DARK,  fontName="Helvetica",
+             leading=14)
 
-def member_style(name):
-    c = MEMBER_COLORS.get(name, ORANGE)
-    return S(f"sMember_{name}", fontSize=11, textColor=c,
-             fontName="Helvetica-Bold", leading=16)
+def hr(c=ORANGE, t=1.5):
+    return HRFlowable(width="100%", thickness=t, color=c, spaceAfter=10, spaceBefore=4)
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-def hr(color=ORANGE, thickness=1.5):
-    return HRFlowable(width="100%", thickness=thickness, color=color,
-                      spaceAfter=10, spaceBefore=4)
+def qa(question, answer):
+    return [Paragraph(f"Q: {question}", sQ), Paragraph(answer, sA)]
 
-def code_block(*lines):
-    els = []
-    els.append(Spacer(1, 4))
-    for line in lines:
-        els.append(Paragraph(line.replace(" ", "&nbsp;").replace("<", "&lt;").replace(">", "&gt;"), sCode))
-    els.append(Spacer(1, 6))
-    return els
-
-def member_badge_table(name, role, day_range):
-    c = MEMBER_COLORS.get(name, ORANGE)
-    hex_c = MEMBER_HEX.get(name, "#ff6000")
-    data = [[
-        Paragraph(f"<font color='{hex_c}'><b>{name}</b></font>", sH2),
-        Paragraph(role, sBody),
-        Paragraph(f"<b>{day_range}</b>", sSmall),
+def day_bar(num, title, member):
+    hx = MEMBER_HEX.get(member, "#ff6000")
+    mc = MEMBER_CLR.get(member, ORANGE)
+    row = [[
+        Paragraph(f"<font color='{hx}'><b>DAY {num}</b></font>", sH2),
+        Paragraph(f"<b>{title}</b>", sH2),
+        Paragraph(f"<font color='{hx}'><b>{member}</b></font>", sH2),
     ]]
-    t = Table(data, colWidths=[4.5*cm, 9*cm, 3.5*cm])
+    t = Table(row, colWidths=[2.8*cm, 10.5*cm, 3.7*cm])
     t.setStyle(TableStyle([
         ("BACKGROUND",   (0,0),(-1,-1), LIGHT),
-        ("ROUNDEDCORNERS", [6]),
         ("TOPPADDING",   (0,0),(-1,-1), 8),
         ("BOTTOMPADDING",(0,0),(-1,-1), 8),
-        ("LEFTPADDING",  (0,0),(-1,-1), 12),
-        ("RIGHTPADDING", (0,0),(-1,-1), 12),
-        ("VALIGN",       (0,0),(-1,-1), "MIDDLE"),
-        ("LINEAFTER",    (0,0),(0,-1),  1, colors.HexColor("#e5e5ea")),
-        ("LINEAFTER",    (1,0),(1,-1),  1, colors.HexColor("#e5e5ea")),
-    ]))
-    return t
-
-def day_header(day_num, title, member):
-    c = MEMBER_COLORS.get(member, ORANGE)
-    hex_c = MEMBER_HEX.get(member, "#ff6000")
-    data = [[
-        Paragraph(f"<font color='{hex_c}'><b>DAY {day_num}</b></font>", sH2),
-        Paragraph(f"<b>{title}</b>", sH2),
-        Paragraph(f"<font color='{hex_c}'>{member}</font>", sH2),
-    ]]
-    t = Table(data, colWidths=[2.5*cm, 11*cm, 3.5*cm])
-    t.setStyle(TableStyle([
-        ("BACKGROUND",   (0,0),(-1,-1), colors.HexColor("#f0f0f5")),
-        ("TOPPADDING",   (0,0),(-1,-1), 7),
-        ("BOTTOMPADDING",(0,0),(-1,-1), 7),
         ("LEFTPADDING",  (0,0),(-1,-1), 10),
         ("RIGHTPADDING", (0,0),(-1,-1), 10),
         ("VALIGN",       (0,0),(-1,-1), "MIDDLE"),
-        ("LINEBELOW",    (0,0),(-1,-1), 2, c),
+        ("LINEBELOW",    (0,0),(-1,-1), 2.5, mc),
     ]))
     return t
 
 # ── Document ──────────────────────────────────────────────────────────────────
 doc = SimpleDocTemplate(
     OUTPUT, pagesize=A4,
-    leftMargin=2*cm, rightMargin=2*cm,
+    leftMargin=2.2*cm, rightMargin=2.2*cm,
     topMargin=2*cm, bottomMargin=2*cm,
 )
-
 story = []
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# COVER PAGE
+# PAGE 1 — COVER
 # ═══════════════════════════════════════════════════════════════════════════════
-cover_title = Table(
-    [[Paragraph("flavor", sTitle)],
-     [Paragraph("7-Day Team Development Plan", sSubtitle)],
-     [Paragraph("CSE 220 Web Programming · Spring 2026", sSubtitle)]],
-    colWidths=[17*cm],
+cover = Table(
+    [[Paragraph("flavor", sCover)],
+     [Paragraph("7-Day Team Development Plan", sCoverSub)],
+     [Paragraph("CSE 220 Web Programming  ·  Spring 2026", sCoverSub)]],
+    colWidths=[16.6*cm],
 )
-cover_title.setStyle(TableStyle([
+cover.setStyle(TableStyle([
     ("BACKGROUND",   (0,0),(-1,-1), DARK),
-    ("TOPPADDING",   (0,0),(-1,-1), 20),
-    ("BOTTOMPADDING",(0,0),(-1,-1), 20),
+    ("TOPPADDING",   (0,0),(-1,-1), 22),
+    ("BOTTOMPADDING",(0,0),(-1,-1), 22),
     ("LEFTPADDING",  (0,0),(-1,-1), 20),
     ("RIGHTPADDING", (0,0),(-1,-1), 20),
-    ("ROUNDEDCORNERS", [12]),
 ]))
-story.append(cover_title)
-story.append(Spacer(1, 20))
+story.append(cover)
+story.append(Spacer(1, 18))
 
-# Team table
-team_data = [
-    [Paragraph("<b>Member</b>", sH3), Paragraph("<b>Role</b>", sH3), Paragraph("<b>GitHub Username</b>", sH3)],
-    [Paragraph("<font color='#ff6000'><b>Yaren</b></font>", sBody), Paragraph("Team Lead · Repo Owner", sBody), Paragraph("@yaren", sSmall)],
-    [Paragraph("<font color='#007aff'><b>Esin</b></font>",  sBody), Paragraph("Models + Home/List Templates", sBody), Paragraph("@esin", sSmall)],
-    [Paragraph("<font color='#34c759'><b>Rana</b></font>",  sBody), Paragraph("Admin + Detail Template", sBody), Paragraph("@rana", sSmall)],
-    [Paragraph("<font color='#af52de'><b>Ramiz</b></font>", sBody), Paragraph("Views + URLs + CSS", sBody), Paragraph("@ramiz", sSmall)],
-]
-team_table = Table(team_data, colWidths=[4*cm, 8*cm, 5*cm])
-team_table.setStyle(TableStyle([
-    ("BACKGROUND",   (0,0),(-1,0),  ORANGE),
-    ("TEXTCOLOR",    (0,0),(-1,0),  WHITE),
-    ("BACKGROUND",   (0,1),(-1,-1), LIGHT),
-    ("ROWBACKGROUNDS",(0,1),(-1,-1),[WHITE, LIGHT]),
-    ("GRID",         (0,0),(-1,-1), 0.5, colors.HexColor("#e5e5ea")),
-    ("TOPPADDING",   (0,0),(-1,-1), 8),
-    ("BOTTOMPADDING",(0,0),(-1,-1), 8),
-    ("LEFTPADDING",  (0,0),(-1,-1), 10),
-    ("RIGHTPADDING", (0,0),(-1,-1), 10),
-    ("VALIGN",       (0,0),(-1,-1), "MIDDLE"),
-]))
+# Team table (no GitHub column)
 story.append(Paragraph("Team Members", sH1))
 story.append(hr())
-story.append(team_table)
+team_data = [
+    [Paragraph("<b>Name</b>", sTableH), Paragraph("<b>Role</b>", sTableH),
+     Paragraph("<b>Admin Login</b>", sTableH), Paragraph("<b>Password</b>", sTableH)],
+    [Paragraph("<font color='#ff6000'><b>Yaren</b></font>", sBody),
+     Paragraph("Team Lead · Repo Owner · Base Template + CSS", sBody),
+     Paragraph("Yaren", sSmall), Paragraph("123456", sSmall)],
+    [Paragraph("<font color='#007aff'><b>Esin</b></font>", sBody),
+     Paragraph("Models · Home &amp; List Templates", sBody),
+     Paragraph("Esin", sSmall), Paragraph("123456", sSmall)],
+    [Paragraph("<font color='#34c759'><b>Rana</b></font>", sBody),
+     Paragraph("Admin Panel · Seed Data · Detail Template", sBody),
+     Paragraph("Rana", sSmall), Paragraph("123456", sSmall)],
+    [Paragraph("<font color='#af52de'><b>Ramiz</b></font>", sBody),
+     Paragraph("Views · URL Routing · About &amp; Contact", sBody),
+     Paragraph("Ramiz", sSmall), Paragraph("123456", sSmall)],
+]
+tt = Table(team_data, colWidths=[3*cm, 8.2*cm, 3*cm, 2.4*cm])
+tt.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0),(-1,0),  DARK),
+    ("ROWBACKGROUNDS",(0,1),(-1,-1), [WHITE, LIGHT]),
+    ("GRID",          (0,0),(-1,-1), 0.5, BORDER),
+    ("TOPPADDING",    (0,0),(-1,-1), 7),
+    ("BOTTOMPADDING", (0,0),(-1,-1), 7),
+    ("LEFTPADDING",   (0,0),(-1,-1), 9),
+    ("RIGHTPADDING",  (0,0),(-1,-1), 9),
+    ("VALIGN",        (0,0),(-1,-1), "MIDDLE"),
+]))
+story.append(tt)
 story.append(Spacer(1, 16))
 
-# Overview schedule table
-story.append(Paragraph("7-Day Overview", sH1))
+# 7-day schedule
+story.append(Paragraph("7-Day Schedule", sH1))
 story.append(hr())
-sched_data = [
-    [Paragraph("<b>Day</b>", sH3), Paragraph("<b>Task</b>", sH3), Paragraph("<b>Who</b>", sH3), Paragraph("<b>Files</b>", sH3)],
-    ["Day 1", "Project setup, GitHub repo, Django init", Paragraph("<font color='#ff6000'>Yaren</font>", sBody), "settings.py, urls.py, requirements.txt"],
-    ["Day 2", "Database models", Paragraph("<font color='#007aff'>Esin</font>", sBody),  "models.py"],
-    ["Day 3", "Admin panel + seed data", Paragraph("<font color='#34c759'>Rana</font>",  sBody),  "admin.py, seed_acibadem.py"],
-    ["Day 4", "Views and URL routing", Paragraph("<font color='#af52de'>Ramiz</font>", sBody), "views.py, restaurants/urls.py"],
-    ["Day 5", "Base template + CSS", Paragraph("<font color='#ff6000'>Yaren</font>", sBody), "base.html, style.css"],
-    ["Day 6", "Home + Restaurants list templates", Paragraph("<font color='#007aff'>Esin</font>", sBody),  "home.html, list.html"],
-    ["Day 7", "Detail + About + Contact templates", Paragraph("<font color='#34c759'>Rana</font>",  sBody),  "detail.html, about.html, contact.html"],
+sched = [
+    [Paragraph("<b>Day</b>", sTableH), Paragraph("<b>Task</b>", sTableH),
+     Paragraph("<b>Who</b>", sTableH), Paragraph("<b>Key Files</b>", sTableH)],
+    ["Day 1", "Project setup, GitHub repo, Django init",
+     Paragraph("<font color='#ff6000'>Yaren</font>", sBody), "settings.py, urls.py"],
+    ["Day 2", "Database models",
+     Paragraph("<font color='#007aff'>Esin</font>", sBody), "models.py"],
+    ["Day 3", "Admin panel + seed data",
+     Paragraph("<font color='#34c759'>Rana</font>", sBody), "admin.py, seed.py"],
+    ["Day 4", "Views and URL routing",
+     Paragraph("<font color='#af52de'>Ramiz</font>", sBody), "views.py, urls.py"],
+    ["Day 5", "Base template + CSS design system",
+     Paragraph("<font color='#ff6000'>Yaren</font>", sBody), "base.html, style.css"],
+    ["Day 6", "Home + Restaurant list templates",
+     Paragraph("<font color='#007aff'>Esin</font>", sBody), "home.html, list.html"],
+    ["Day 7", "Detail + About + Contact templates",
+     Paragraph("<font color='#34c759'>Rana</font>", sBody), "detail.html, about.html"],
 ]
-for i, row in enumerate(sched_data[1:], 1):
+for i, row in enumerate(sched[1:], 1):
     if not isinstance(row[0], Paragraph):
-        sched_data[i][0] = Paragraph(f"<b>{row[0]}</b>", sBody)
+        sched[i][0] = Paragraph(f"<b>{row[0]}</b>", sBody)
     if not isinstance(row[3], Paragraph):
-        sched_data[i][3] = Paragraph(f"<font face='Courier' size='8'>{row[3]}</font>", sSmall)
-
-sched_table = Table(sched_data, colWidths=[1.8*cm, 6.5*cm, 3.2*cm, 5.5*cm])
-sched_table.setStyle(TableStyle([
+        sched[i][3] = Paragraph(row[3], sSmall)
+st = Table(sched, colWidths=[1.8*cm, 7*cm, 3*cm, 4.8*cm])
+st.setStyle(TableStyle([
     ("BACKGROUND",    (0,0),(-1,0),  DARK),
-    ("TEXTCOLOR",     (0,0),(-1,0),  WHITE),
     ("ROWBACKGROUNDS",(0,1),(-1,-1), [WHITE, LIGHT]),
-    ("GRID",          (0,0),(-1,-1), 0.5, colors.HexColor("#e5e5ea")),
+    ("GRID",          (0,0),(-1,-1), 0.5, BORDER),
     ("TOPPADDING",    (0,0),(-1,-1), 7),
     ("BOTTOMPADDING", (0,0),(-1,-1), 7),
     ("LEFTPADDING",   (0,0),(-1,-1), 8),
     ("RIGHTPADDING",  (0,0),(-1,-1), 8),
     ("VALIGN",        (0,0),(-1,-1), "MIDDLE"),
 ]))
-story.append(sched_table)
+story.append(st)
 story.append(PageBreak())
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# DAY 1 — YAREN
+# PAGE 2 — settings.py
 # ═══════════════════════════════════════════════════════════════════════════════
-story.append(day_header(1, "Project Setup & GitHub Repository", "Yaren"))
-story.append(Spacer(1, 10))
-story.append(Paragraph("What to do:", sH2))
-story.append(Paragraph("1. Create a new GitHub repository named <b>flavor</b> (public, add README).", sBullet))
-story.append(Paragraph("2. Invite Esin, Rana, and Ramiz as collaborators (Settings > Collaborators).", sBullet))
-story.append(Paragraph("3. Create the Django project structure using the terminal commands below.", sBullet))
-story.append(Paragraph("4. Push the initial project to GitHub.", sBullet))
-story.append(Spacer(1, 6))
-
-story.append(Paragraph("Terminal commands (run in order):", sH3))
-story += code_block(
-    "mkdir flavor && cd flavor",
-    "python3 -m venv venv",
-    "source venv/bin/activate",
-    "pip install django",
-    "pip freeze > requirements.txt",
-    "django-admin startproject flavor .",
-    "python manage.py startapp restaurants",
-    "python manage.py migrate",
-    "python manage.py createsuperuser",
-)
-
-story.append(Paragraph("File: <font face='Courier'>flavor/settings.py</font> — paste these additions at the bottom:", sH3))
-story += code_block(
-    "LANGUAGE_CODE = 'en-us'",
-    "TIME_ZONE = 'Europe/Istanbul'",
-    "",
-    "TEMPLATES[0]['DIRS'] = [BASE_DIR / 'templates']",
-    "",
-    "STATICFILES_DIRS = [BASE_DIR / 'static']",
-    "STATIC_URL = '/static/'",
-)
+story.append(Paragraph("settings.py — Explained", sH1))
+story.append(hr())
 story.append(Paragraph(
-    "Why: Django needs to know where to find HTML templates (templates/) and CSS/JS files (static/). "
-    "Setting LANGUAGE_CODE and TIME_ZONE makes dates display correctly.",
-    sBodyJ
-))
+    "settings.py is the configuration file for the entire Django project. "
+    "It tells Django how to behave: where to find files, which database to use, "
+    "which apps are active, and much more. Every setting here affects the whole project.",
+    sBodyJ))
 story.append(Spacer(1, 8))
 
-story.append(Paragraph("File: <font face='Courier'>flavor/urls.py</font> — main URL dispatcher:", sH3))
-story += code_block(
-    "from django.contrib import admin",
-    "from django.urls import path, include",
-    "",
-    "urlpatterns = [",
-    "    path('admin/', admin.site.urls),",
-    "    path('', include('restaurants.urls')),",
-    "]",
-)
-story.append(Paragraph(
-    "Why: This file is Django's central router. The empty string '' means all non-admin URLs "
-    "will be handled by the restaurants app's own urls.py.",
-    sBodyJ
-))
+for q, a in [
+    ("What is settings.py and why does it exist?",
+     "Django needs a central place to store all project configuration. Instead of hardcoding "
+     "paths, database names, or secret keys inside every file, they are all defined once in "
+     "settings.py. Every other part of Django reads from this file automatically when the server starts."),
 
-story.append(Paragraph("GitHub push:", sH3))
-story += code_block(
-    "git init",
-    "git add .",
-    "git commit -m 'Initial Django project setup'",
-    "git branch -M main",
-    "git remote add origin https://github.com/yaren/flavor.git",
-    "git push -u origin main",
-)
-story.append(PageBreak())
+    ("What is SECRET_KEY and why must it be kept private?",
+     "SECRET_KEY is a long random string used by Django to cryptographically sign cookies, "
+     "sessions, and CSRF tokens. If someone steals this key they can forge user sessions and "
+     "bypass security. In a real production project it must never be committed to GitHub — "
+     "it should be stored in an environment variable. In our demo project we keep it in "
+     "settings.py for simplicity only."),
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# DAY 2 — ESIN
-# ═══════════════════════════════════════════════════════════════════════════════
-story.append(day_header(2, "Database Models", "Esin"))
-story.append(Spacer(1, 10))
-story.append(Paragraph("Before starting:", sH2))
-story.append(Paragraph("1. Clone the repo:  git clone https://github.com/yaren/flavor.git", sBullet))
-story.append(Paragraph("2. Activate venv:   source venv/bin/activate", sBullet))
-story.append(Paragraph("3. Install deps:    pip install -r requirements.txt", sBullet))
-story.append(Spacer(1, 6))
+    ("What does DEBUG = True do and when should it be False?",
+     "When DEBUG is True, Django shows a full error page with code snippets and variable values "
+     "whenever something goes wrong. This is extremely useful during development. "
+     "However, it must be set to False before deploying to the internet, because those error "
+     "pages reveal internal code paths and sensitive information to anyone who visits a broken URL."),
 
-story.append(Paragraph("File: <font face='Courier'>restaurants/models.py</font>", sH3))
-story += code_block(
-    "from django.db import models",
-    "from django.db.models import Avg",
-    "",
-    "class Category(models.Model):",
-    "    name = models.CharField(max_length=100)",
-    "    class Meta:",
-    "        verbose_name_plural = 'Categories'",
-    "    def __str__(self):",
-    "        return self.name",
-    "",
-    "class Location(models.Model):",
-    "    city     = models.CharField(max_length=100)",
-    "    district = models.CharField(max_length=100)",
-    "    def __str__(self):",
-    "        return f'{self.district}, {self.city}'",
-    "",
-    "PRICE_CHOICES = [('1','EUR'), ('2','EUR EUR'), ('3','EUR EUR EUR')]",
-    "",
-    "class Restaurant(models.Model):",
-    "    name        = models.CharField(max_length=200)",
-    "    description = models.TextField()",
-    "    address     = models.CharField(max_length=300)",
-    "    phone       = models.CharField(max_length=20)",
-    "    price_range = models.CharField(max_length=1, choices=PRICE_CHOICES, default='2')",
-    "    category    = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)",
-    "    location    = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)",
-    "    created_at  = models.DateTimeField(auto_now_add=True)",
-    "    def __str__(self): return self.name",
-    "    def average_rating(self):",
-    "        avg = self.reviews.aggregate(avg=Avg('rating'))['avg']",
-    "        return round(avg, 1) if avg else None",
-    "    def price_display(self):",
-    "        return dict(PRICE_CHOICES).get(self.price_range, 'EUR EUR')",
-    "",
-    "class Review(models.Model):",
-    "    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE,",
-    "                                   related_name='reviews')",
-    "    author     = models.CharField(max_length=100)",
-    "    rating     = models.IntegerField(choices=[(i,i) for i in range(1,6)])",
-    "    text       = models.TextField()",
-    "    created_at = models.DateTimeField(auto_now_add=True)",
-    "    def __str__(self):",
-    "        return f'{self.author} - {self.restaurant.name} ({self.rating})'",
-)
+    ("What is INSTALLED_APPS and what happens if we forget to add our app?",
+     "INSTALLED_APPS is a list of all Django applications that are active in the project. "
+     "Django uses this list to find templates, static files, models, and management commands. "
+     "If we forget to add 'restaurants' here, Django will not find our models when we run "
+     "makemigrations and the database tables will never be created."),
 
-story.append(Paragraph("After writing the file, run migrations:", sH3))
-story += code_block(
-    "python manage.py makemigrations",
-    "python manage.py migrate",
-)
-story.append(Paragraph(
-    "Why models.py matters: This file defines all the database tables. "
-    "Category groups restaurants by cuisine type. Location stores city/district. "
-    "Restaurant is the core table — it links to both Category and Location with ForeignKeys. "
-    "Review belongs to a Restaurant (CASCADE delete = if restaurant deleted, reviews go too). "
-    "average_rating() calculates the mean score using SQL Avg aggregation. "
-    "price_display() converts the stored '1'/'2'/'3' code into a human-readable EUR symbol string.",
-    sBodyJ
-))
+    ("What do TEMPLATES and DIRS do?",
+     "TEMPLATES tells Django how to find and render HTML files. The DIRS key is a list of "
+     "folders where Django should look for templates. We set it to [BASE_DIR / 'templates'] "
+     "so that all our .html files inside the top-level templates/ folder are found automatically. "
+     "Without this, Django would only look inside each app's own templates/ subfolder."),
 
-story.append(Paragraph("Push to GitHub:", sH3))
-story += code_block(
-    "git add restaurants/models.py restaurants/migrations/",
-    "git commit -m 'Add Category, Location, Restaurant, Review models'",
-    "git push",
-)
-story.append(PageBreak())
+    ("What is STATICFILES_DIRS and how does CSS get loaded?",
+     "Static files are CSS, JavaScript, and images — files that do not change per request. "
+     "STATICFILES_DIRS tells Django where to find them on disk (our static/ folder). "
+     "STATIC_URL sets the URL prefix, so style.css becomes accessible at /static/css/style.css. "
+     "In templates we write {% load static %} and {% static 'css/style.css' %} to generate "
+     "the correct URL automatically."),
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# DAY 3 — RANA
-# ═══════════════════════════════════════════════════════════════════════════════
-story.append(day_header(3, "Admin Panel + Seed Data", "Rana"))
-story.append(Spacer(1, 10))
-story.append(Paragraph("Pull latest changes first:", sH3))
-story += code_block("git pull origin main")
+    ("What is DATABASES and why are we using SQLite?",
+     "DATABASES defines which database engine to use and how to connect to it. "
+     "SQLite stores the entire database in a single file (db.sqlite3) on disk with no server needed. "
+     "It is perfect for development and small demo projects. For a real production site we would "
+     "switch to PostgreSQL or MySQL, but the settings.py change is minimal — only the ENGINE "
+     "and connection parameters change, not any of our Python code."),
 
-story.append(Paragraph("File: <font face='Courier'>restaurants/admin.py</font>", sH3))
-story += code_block(
-    "from django.contrib import admin",
-    "from .models import Category, Location, Restaurant, Review",
-    "",
-    "@admin.register(Category)",
-    "class CategoryAdmin(admin.ModelAdmin):",
-    "    list_display  = ['name']",
-    "    search_fields = ['name']",
-    "",
-    "@admin.register(Location)",
-    "class LocationAdmin(admin.ModelAdmin):",
-    "    list_display  = ['city', 'district']",
-    "    list_filter   = ['city']",
-    "    search_fields = ['city', 'district']",
-    "",
-    "@admin.register(Restaurant)",
-    "class RestaurantAdmin(admin.ModelAdmin):",
-    "    list_display  = ['name', 'category', 'location', 'price_range', 'created_at']",
-    "    list_filter   = ['category', 'price_range', 'location__city']",
-    "    search_fields = ['name', 'description', 'address']",
-    "",
-    "@admin.register(Review)",
-    "class ReviewAdmin(admin.ModelAdmin):",
-    "    list_display  = ['restaurant', 'author', 'rating', 'created_at']",
-    "    list_filter   = ['rating', 'restaurant']",
-    "    search_fields = ['author', 'text']",
-)
-story.append(Paragraph(
-    "Why admin.py matters: The @admin.register decorator registers each model with Django's built-in "
-    "admin panel at /admin/. list_display controls which columns appear in the table view. "
-    "list_filter adds sidebar filter buttons. search_fields enables a search box. "
-    "Without this file the admin panel exists but shows no models.",
-    sBodyJ
-))
-story.append(Spacer(1, 8))
+    ("What are LANGUAGE_CODE and TIME_ZONE?",
+     "LANGUAGE_CODE sets the default human language for built-in messages like form validation "
+     "errors. TIME_ZONE controls how dates and times are stored and displayed. We set it to "
+     "Europe/Istanbul so that review timestamps appear in local Turkish time instead of UTC."),
 
-story.append(Paragraph("File: <font face='Courier'>seed_acibadem.py</font> — adds sample restaurants:", sH3))
-story += code_block(
-    "import os, django",
-    "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'flavor.settings')",
-    "django.setup()",
-    "from restaurants.models import Category, Location, Restaurant, Review",
-    "",
-    "loc, _ = Location.objects.get_or_create(city='Istanbul', district='Acibadem')",
-    "cafe, _ = Category.objects.get_or_create(name='Cafe')",
-    "",
-    "r = Restaurant.objects.create(",
-    "    name='Starbucks Acibadem',",
-    "    description='Cozy coffee shop near Acibadem University.',",
-    "    address='Acibadem Cad. No:12', phone='+90 216 340 10 10',",
-    "    price_range='2', category=cafe, location=loc)",
-    "Review.objects.create(restaurant=r, author='Emily',",
-    "    rating=5, text='Great coffee and fast wifi!')",
-    "print('Done')",
-)
-story.append(Paragraph("Run the seed script:", sH3))
-story += code_block("python3 seed_acibadem.py")
-
-story.append(Paragraph("Push to GitHub:", sH3))
-story += code_block(
-    "git add restaurants/admin.py seed_acibadem.py",
-    "git commit -m 'Add admin configuration and seed data script'",
-    "git push",
-)
-story.append(PageBreak())
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DAY 4 — RAMIZ
-# ═══════════════════════════════════════════════════════════════════════════════
-story.append(day_header(4, "Views & URL Routing", "Ramiz"))
-story.append(Spacer(1, 10))
-story.append(Paragraph("Pull latest changes first:", sH3))
-story += code_block("git pull origin main")
-
-story.append(Paragraph("File: <font face='Courier'>restaurants/views.py</font>", sH3))
-story += code_block(
-    "from django.shortcuts import render, get_object_or_404",
-    "from .models import Restaurant, Category",
-    "",
-    "def home(request):",
-    "    restaurants = Restaurant.objects.all().order_by('-created_at')[:6]",
-    "    categories  = Category.objects.all()",
-    "    return render(request, 'home.html',",
-    "                  {'restaurants': restaurants, 'categories': categories})",
-    "",
-    "def restaurant_list(request):",
-    "    restaurants  = Restaurant.objects.all().order_by('-created_at')",
-    "    categories   = Category.objects.all()",
-    "    q            = request.GET.get('q', '')",
-    "    category_id  = request.GET.get('category', '')",
-    "    price        = request.GET.get('price', '')",
-    "    if q:",
-    "        restaurants = restaurants.filter(name__icontains=q)",
-    "    if category_id:",
-    "        restaurants = restaurants.filter(category_id=category_id)",
-    "    if price:",
-    "        restaurants = restaurants.filter(price_range=price)",
-    "    return render(request, 'restaurants/list.html',",
-    "                  {'restaurants': restaurants, 'categories': categories})",
-    "",
-    "def restaurant_detail(request, pk):",
-    "    restaurant = get_object_or_404(Restaurant, pk=pk)",
-    "    reviews    = restaurant.reviews.all().order_by('-created_at')",
-    "    return render(request, 'restaurants/detail.html',",
-    "                  {'restaurant': restaurant, 'reviews': reviews})",
-    "",
-    "def about(request):",
-    "    return render(request, 'about.html')",
-    "",
-    "def contact(request):",
-    "    return render(request, 'contact.html')",
-)
-
-story.append(Paragraph("File: <font face='Courier'>restaurants/urls.py</font>", sH3))
-story += code_block(
-    "from django.urls import path",
-    "from . import views",
-    "",
-    "urlpatterns = [",
-    "    path('',                       views.home,              name='home'),",
-    "    path('restaurants/',           views.restaurant_list,   name='restaurant_list'),",
-    "    path('restaurants/int:pk/',    views.restaurant_detail, name='restaurant_detail'),",
-    "    path('about/',                 views.about,             name='about'),",
-    "    path('contact/',               views.contact,           name='contact'),",
-    "]",
-)
-story.append(Paragraph(
-    "Why views.py matters: Views are the bridge between the database and the templates. "
-    "home() fetches the 6 newest restaurants and all categories, then passes them to the template. "
-    "restaurant_list() reads optional GET parameters (q, category, price) from the URL and filters "
-    "the queryset accordingly — this powers the search and filter functionality. "
-    "restaurant_detail() uses get_object_or_404 which automatically returns a 404 page if the "
-    "restaurant ID does not exist. All views call render() which combines the data with an HTML template.",
-    sBodyJ
-))
-
-story.append(Paragraph("Push to GitHub:", sH3))
-story += code_block(
-    "git add restaurants/views.py restaurants/urls.py",
-    "git commit -m 'Add views and URL routing'",
-    "git push",
-)
-story.append(PageBreak())
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DAY 5 — YAREN
-# ═══════════════════════════════════════════════════════════════════════════════
-story.append(day_header(5, "Base Template & CSS", "Yaren"))
-story.append(Spacer(1, 10))
-story.append(Paragraph("Pull latest changes first:", sH3))
-story += code_block("git pull origin main")
-story.append(Paragraph("Create these folders:", sH3))
-story += code_block(
-    "mkdir -p templates",
-    "mkdir -p static/css",
-)
-
-story.append(Paragraph("File: <font face='Courier'>templates/base.html</font>", sH3))
-story.append(Paragraph(
-    "This is the master template that all other pages extend. It contains the nav bar, "
-    "the Google Fonts Inter import, the CSS link, and the footer. Every page uses "
-    "{% extends 'base.html' %} and {% block content %}...{% endblock %} to inject their own content.",
-    sBodyJ
-))
-story += code_block(
-    "{% load static %}",
-    "<!DOCTYPE html>",
-    "<html lang='en'>",
-    "<head>",
-    "  <meta charset='UTF-8'>",
-    "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>",
-    "  <title>{% block title %}flavor{% endblock %}</title>",
-    "  <link rel='preconnect' href='https://fonts.googleapis.com'>",
-    "  <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'",
-    "        rel='stylesheet'>",
-    "  <link rel='stylesheet' href='{% static 'css/style.css' %}'>",
-    "</head>",
-    "<body>",
-    "<nav class='nav'>",
-    "  <div class='nav-inner'>",
-    "    <a href='{% url 'home' %}' class='nav-brand'>fl<span>a</span>vor</a>",
-    "    <div class='nav-links'>",
-    "      <a href='{% url 'home' %}'>Home</a>",
-    "      <a href='{% url 'restaurant_list' %}'>Restaurants</a>",
-    "      <a href='{% url 'about' %}'>About</a>",
-    "      <a href='{% url 'contact' %}'>Contact</a>",
-    "    </div>",
-    "  </div>",
-    "</nav>",
-    "<main>{% block content %}{% endblock %}</main>",
-    "<footer>...(see project file)...</footer>",
-    "</body></html>",
-)
-
-story.append(Paragraph("Key CSS variables in <font face='Courier'>static/css/style.css</font>:", sH3))
-story += code_block(
-    ":root {",
-    "  --font:   'Inter', -apple-system, sans-serif;",
-    "  --accent: #ff6000;   /* orange */",
-    "  --text:   #1d1d1f;",
-    "  --bg-2:   #f5f5f7;   /* light gray */",
-    "  --border: #e5e5ea;",
-    "}",
-    "body { font-family: var(--font); min-height: 100vh;",
-    "       display: flex; flex-direction: column; }",
-    "main { flex: 1; }  /* pushes footer to bottom */",
-)
-
-story.append(Paragraph("Push to GitHub:", sH3))
-story += code_block(
-    "git add templates/base.html static/css/style.css",
-    "git commit -m 'Add base template and CSS design system'",
-    "git push",
-)
-story.append(PageBreak())
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DAY 6 — ESIN
-# ═══════════════════════════════════════════════════════════════════════════════
-story.append(day_header(6, "Home Page + Restaurant List Template", "Esin"))
-story.append(Spacer(1, 10))
-story.append(Paragraph("Pull latest changes first:", sH3))
-story += code_block("git pull origin main")
-
-story.append(Paragraph("File: <font face='Courier'>templates/home.html</font>", sH3))
-story.append(Paragraph(
-    "The home page extends base.html and contains only the hero section — "
-    "a large heading, subtitle, and a search form that submits to the restaurant_list URL. "
-    "Keeping it minimal makes it look clean and professional.",
-    sBodyJ
-))
-story += code_block(
-    "{% extends 'base.html' %}",
-    "{% block title %}flavor - Discover Restaurants{% endblock %}",
-    "{% block content %}",
-    "<div class='hero'>",
-    "  <div class='hero-label'>Your Restaurant Guide</div>",
-    "  <h1>YER<br><span>Routes</span></h1>",
-    "  <p>Find the best restaurants in your city.</p>",
-    "  <form class='hero-search' action='{% url 'restaurant_list' %}' method='get'>",
-    "    <input type='text' name='q' placeholder='Search...'>",
-    "    <button type='submit'>Search</button>",
-    "  </form>",
-    "</div>",
-    "{% endblock %}",
-)
-
-story.append(Paragraph("File: <font face='Courier'>templates/restaurants/list.html</font>", sH3))
-story.append(Paragraph(
-    "The list page shows all restaurants in a card grid. It includes a filter bar "
-    "with category and price dropdowns that auto-submit using onchange. "
-    "The {% for r in restaurants %} loop renders one card per restaurant. "
-    "The {{ restaurants|length }} tag counts results dynamically.",
-    sBodyJ
-))
-story += code_block(
-    "{% extends 'base.html' %}",
-    "{% block content %}",
-    "<div class='section'><div class='wrap'>",
-    "  <form method='get'>",
-    "    <div class='filter-bar'>",
-    "      <select name='category' onchange='this.form.submit()'>",
-    "        <option value=''>All Categories</option>",
-    "        {% for cat in categories %}",
-    "        <option value='{{ cat.id }}'>{{ cat.name }}</option>",
-    "        {% endfor %}",
-    "      </select>",
-    "    </div>",
-    "  </form>",
-    "  <div class='cards'>",
-    "    {% for r in restaurants %}",
-    "    <a href='{% url 'restaurant_detail' r.pk %}' class='card'>",
-    "      <div class='card-body'>",
-    "        <div class='card-name'>{{ r.name }}</div>",
-    "        <div class='card-loc'>{{ r.location }}</div>",
-    "      </div>",
-    "    </a>",
-    "    {% endfor %}",
-    "  </div>",
-    "</div></div>",
-    "{% endblock %}",
-)
-
-story.append(Paragraph("Create the restaurants template folder first:", sH3))
-story += code_block("mkdir -p templates/restaurants")
-
-story.append(Paragraph("Push to GitHub:", sH3))
-story += code_block(
-    "git add templates/home.html templates/restaurants/list.html",
-    "git commit -m 'Add home page and restaurant list template'",
-    "git push",
-)
-story.append(PageBreak())
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DAY 7 — RANA + RAMIZ
-# ═══════════════════════════════════════════════════════════════════════════════
-story.append(day_header(7, "Detail, About & Contact Templates", "Rana"))
-story.append(Spacer(1, 10))
-story.append(Paragraph("Pull latest changes first:", sH3))
-story += code_block("git pull origin main")
-
-story.append(Paragraph("File: <font face='Courier'>templates/restaurants/detail.html</font> — Rana's task:", sH3))
-story.append(Paragraph(
-    "The detail page displays a single restaurant. It shows the restaurant name, category tag, "
-    "description, address, phone, and a reviews section. The breadcrumb at the top (Home / Restaurants / Name) "
-    "helps users navigate back. The sidebar shows the average rating as a large number.",
-    sBodyJ
-))
-story += code_block(
-    "{% extends 'base.html' %}",
-    "{% block content %}",
-    "<div class='detail-wrap'>",
-    "  <div>",
-    "    <div class='breadcrumb'>",
-    "      <a href='{% url 'home' %}'>Home</a> /",
-    "      <a href='{% url 'restaurant_list' %}'>Restaurants</a> /",
-    "      {{ restaurant.name }}",
-    "    </div>",
-    "    <h1 class='detail-name'>{{ restaurant.name }}</h1>",
-    "    <p class='detail-desc'>{{ restaurant.description }}</p>",
-    "    <div class='reviews-section'>",
-    "      <div class='reviews-title'>Reviews</div>",
-    "      {% for review in reviews %}",
-    "      <div class='review-card'>",
-    "        <b>{{ review.author }}</b> rated {{ review.rating }}/5",
-    "        <p>{{ review.text }}</p>",
-    "      </div>",
-    "      {% empty %}",
-    "      <p>No reviews yet.</p>",
-    "      {% endfor %}",
-    "    </div>",
-    "  </div>",
-    "  <aside>",
-    "    <div class='info-card'>",
-    "      <div class='rating-num'>{{ restaurant.average_rating }}</div>",
-    "    </div>",
-    "  </aside>",
-    "</div>",
-    "{% endblock %}",
-)
-
-story.append(Spacer(1, 10))
-story.append(Paragraph("Files: <font face='Courier'>templates/about.html</font> and <font face='Courier'>templates/contact.html</font> — also Rana:", sH3))
-story += code_block(
-    "{% extends 'base.html' %}",
-    "{% block title %}About - flavor{% endblock %}",
-    "{% block content %}",
-    "<div class='section'><div class='wrap'>",
-    "  <h1>Let's discover great food together.</h1>",
-    "  <p>flavor is a restaurant discovery platform...</p>",
-    "</div></div>",
-    "{% endblock %}",
-)
-
-story.append(Spacer(1, 10))
-story.append(Paragraph("Final test by all members:", sH2))
-for step in [
-    "Run:  python manage.py runserver",
-    "Open: http://127.0.0.1:8000/ — hero page visible",
-    "Open: http://127.0.0.1:8000/restaurants/ — restaurant cards visible",
-    "Click a restaurant card — detail page opens",
-    "Open: http://127.0.0.1:8000/admin/ — login with superuser, add data",
-    "Test search and category/price filters on the list page",
+    ("How does settings.py connect to the rest of the project?",
+     "When you run python manage.py runserver, Django reads the environment variable "
+     "DJANGO_SETTINGS_MODULE to find settings.py. Every component — models, views, templates, "
+     "admin, migrations — automatically imports from this file. The BASE_DIR variable "
+     "at the top is a pathlib.Path pointing to the project root folder, used to build "
+     "all other absolute paths safely across different operating systems."),
 ]:
-    story.append(Paragraph(f"• {step}", sBullet))
+    story += qa(q, a)
+
+story.append(PageBreak())
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PAGE 3 — urls.py
+# ═══════════════════════════════════════════════════════════════════════════════
+story.append(Paragraph("urls.py — Explained", sH1))
+story.append(hr())
+story.append(Paragraph(
+    "urls.py is Django's routing system. When a user visits a URL, Django reads through the "
+    "urlpatterns list from top to bottom, finds the first pattern that matches, and calls the "
+    "corresponding view function. There are two urls.py files in this project.",
+    sBodyJ))
+story.append(Spacer(1, 8))
+
+for q, a in [
+    ("Why are there two urls.py files?",
+     "The main urls.py lives inside the flavor/ config folder and is the entry point for all "
+     "incoming requests. It delegates restaurant-related URLs to the restaurants app's own urls.py "
+     "using include(). This keeps each app self-contained — the restaurants app owns its own routes "
+     "and can theoretically be reused in another project without changes."),
+
+    ("What does path('', include('restaurants.urls')) mean?",
+     "The empty string '' means 'match any URL that starts with nothing extra' — in other words, "
+     "the root of the site. include() tells Django to pass the rest of the URL to restaurants/urls.py "
+     "for further matching. So a request to /restaurants/ hits the main urls.py first, which "
+     "passes it to restaurants/urls.py, which matches 'restaurants/' to the restaurant_list view."),
+
+    ("What is the order of urlpatterns and does it matter?",
+     "Yes, order matters. Django checks patterns from top to bottom and stops at the first match. "
+     "The admin URL must come before catch-all patterns to avoid being accidentally overridden. "
+     "In our restaurants/urls.py the specific path restaurants/<int:pk>/ must be listed "
+     "after restaurants/ — if a more general pattern came first, the specific one would never "
+     "be reached. Always place more specific paths before more general ones."),
+
+    ("What does <int:pk> mean in a URL pattern?",
+     "This is a URL converter. <int:pk> captures a segment of the URL that looks like an integer "
+     "and passes it to the view as a keyword argument named pk (short for primary key). "
+     "When a user visits /restaurants/7/, Django extracts the number 7, converts it to a Python int, "
+     "and calls restaurant_detail(request, pk=7). If the segment is not a number, Django returns "
+     "a 404 automatically without even calling the view."),
+
+    ("What is the name= parameter in each path() and why is it important?",
+     "The name parameter gives each URL pattern a unique label. Instead of hardcoding URLs as "
+     "strings in templates (like href='/restaurants/') we write {% url 'restaurant_list' %}. "
+     "Django replaces this tag with the actual URL at render time. The huge benefit is that "
+     "if we ever change the URL structure (e.g. from /restaurants/ to /places/), "
+     "we only update urls.py and every template updates automatically — nothing breaks."),
+
+    ("What happens when no URL pattern matches?",
+     "If no pattern in urlpatterns matches the requested URL, Django raises a Http404 exception "
+     "and returns a 404 Not Found response. In DEBUG mode this shows a yellow error page listing "
+     "all patterns Django tried. In production (DEBUG=False) it shows the contents of a "
+     "custom 404.html template if one exists, otherwise a plain text error."),
+
+    ("How does a URL request travel from the browser to the screen?",
+     "Step 1: Browser sends GET /restaurants/?q=pizza to the server. "
+     "Step 2: Django reads ROOT_URLCONF from settings.py and loads flavor/urls.py. "
+     "Step 3: '' matches, so Django passes the full URL to restaurants/urls.py. "
+     "Step 4: 'restaurants/' matches restaurant_list view. "
+     "Step 5: Django calls restaurant_list(request) where request.GET contains {'q': 'pizza'}. "
+     "Step 6: The view queries the database, builds a context dictionary, and calls render(). "
+     "Step 7: Django finds list.html in the templates/ folder, fills it with the context, "
+     "and sends the finished HTML back to the browser."),
+]:
+    story += qa(q, a)
+
+story.append(PageBreak())
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PAGE 4 — Admin Panel
+# ═══════════════════════════════════════════════════════════════════════════════
+story.append(Paragraph("Django Admin Panel — Explained", sH1))
+story.append(hr())
+story.append(Paragraph(
+    "Django's admin panel is a fully featured management interface that Django generates "
+    "automatically. It lets you add, edit, delete, and search database records through a "
+    "web browser without writing a single line of SQL.",
+    sBodyJ))
+story.append(Spacer(1, 8))
+
+for q, a in [
+    ("How do I access the admin panel?",
+     "Start the development server with python manage.py runserver, then open your browser "
+     "and go to http://127.0.0.1:8000/admin/. Log in with one of the superuser accounts below. "
+     "You will see a dashboard listing all registered models."),
+
+    ("What are the four superuser accounts for this project?",
+     "All four team members have superuser access with the same password:\n"
+     "  Yaren   /   password: 123456\n"
+     "  Esin    /   password: 123456\n"
+     "  Rana    /   password: 123456\n"
+     "  Ramiz   /   password: 123456\n"
+     "A superuser has full access to everything in the admin panel. In a real application "
+     "each person would have a unique strong password."),
+
+    ("What is the difference between a superuser, staff user, and regular user?",
+     "A regular user can log into the main site (if login exists) but cannot access /admin/. "
+     "A staff user (is_staff=True) can log into the admin panel but only sees models they "
+     "have explicit permissions for. A superuser (is_superuser=True) bypasses all permission "
+     "checks and can do everything — create, edit, delete any record and manage other users."),
+
+    ("How do I add a new restaurant through the admin?",
+     "1. Go to http://127.0.0.1:8000/admin/ and log in. "
+     "2. Click 'Restaurants' under the Restaurants section. "
+     "3. Click the '+ Add' button in the top right. "
+     "4. Fill in the Name, Description, Address, Phone, Price Range fields. "
+     "5. Select a Category and Location from the dropdowns (add them first if needed). "
+     "6. Click Save. The restaurant immediately appears on the website."),
+
+    ("How do I add a Category or Location first?",
+     "In the admin dashboard you will see Categories and Locations listed separately. "
+     "Click '+ Add' next to each one, enter the name or city/district, and save. "
+     "Once saved they appear in the dropdown menus when adding a restaurant. "
+     "You must add at least one Category and one Location before you can add a restaurant."),
+
+    ("How do I add a review for a restaurant?",
+     "Click 'Reviews' in the admin sidebar, then '+ Add'. Select the restaurant from the "
+     "dropdown, enter the author name, choose a rating from 1 to 5, write the review text, "
+     "and click Save. The review will appear immediately on that restaurant's detail page."),
+
+    ("What does list_display do in admin.py?",
+     "list_display is a tuple of field names that appear as columns in the admin list view. "
+     "For RestaurantAdmin we set list_display = ['name', 'category', 'location', 'price_range', "
+     "'created_at']. This means when you click Restaurants in the admin, you see a table with "
+     "those five columns for every restaurant. Without list_display, Django only shows the "
+     "__str__ representation in a single column."),
+
+    ("What does list_filter do?",
+     "list_filter adds a sidebar on the right side of the list view with clickable filter "
+     "buttons. For restaurants we filter by category, price_range, and location city. "
+     "Clicking 'Cafe' instantly filters the list to show only cafes. "
+     "It makes finding records much faster when there are many entries."),
+
+    ("What does search_fields do?",
+     "search_fields enables a search box at the top of the admin list. When you type something "
+     "and press Enter, Django runs a SQL LIKE query on the specified fields. For restaurants we "
+     "search in name, description, and address. So typing 'Acibadem' finds all restaurants "
+     "whose name, description, or address contains that word."),
+
+    ("Why is the admin panel important for this project?",
+     "For the Week 8 demo the admin panel is our primary data management tool. It lets us "
+     "add and demonstrate restaurants, categories, locations, and reviews without building "
+     "separate create/edit forms. It also satisfies the assignment requirement for CRUD "
+     "(Create, Read, Update, Delete) operations. The instructor can log in and verify data "
+     "is stored correctly in the database."),
+
+    ("What is @admin.register and why is it better than admin.site.register()?",
+     "@admin.register(Category) is a Python decorator that registers the CategoryAdmin class "
+     "with the admin site for the Category model. It is exactly equivalent to writing "
+     "admin.site.register(Category, CategoryAdmin) at the end of the file, but is cleaner "
+     "because the model and its admin class are visually connected at the top of the class "
+     "definition. Both approaches work — the decorator is simply the modern convention."),
+]:
+    story += qa(q, a)
 
 story.append(Spacer(1, 10))
-story.append(Paragraph("Final push:", sH3))
-story += code_block(
-    "git add .",
-    "git commit -m 'Complete Week 8 demo - all templates done'",
-    "git push",
-)
 
-story.append(Spacer(1, 12))
+# Login credentials table
+story.append(Paragraph("Quick Reference — Admin Login Credentials", sH2))
+cred_data = [
+    [Paragraph("<b>Username</b>", sTableH), Paragraph("<b>Password</b>", sTableH),
+     Paragraph("<b>Role</b>", sTableH), Paragraph("<b>Access Level</b>", sTableH)],
+    [Paragraph("<font color='#ff6000'>Yaren</font>", sBody),  "123456", "Team Lead",   "Superuser"],
+    [Paragraph("<font color='#007aff'>Esin</font>",  sBody),  "123456", "Developer",  "Superuser"],
+    [Paragraph("<font color='#34c759'>Rana</font>",  sBody),  "123456", "Developer",  "Superuser"],
+    [Paragraph("<font color='#af52de'>Ramiz</font>", sBody),  "123456", "Developer",  "Superuser"],
+]
+for i, row in enumerate(cred_data[1:], 1):
+    for j in [1, 2, 3]:
+        if not isinstance(row[j], Paragraph):
+            cred_data[i][j] = Paragraph(str(row[j]), sBody)
+
+ct = Table(cred_data, colWidths=[4*cm, 3.5*cm, 5*cm, 4.1*cm])
+ct.setStyle(TableStyle([
+    ("BACKGROUND",    (0,0),(-1,0),  DARK),
+    ("ROWBACKGROUNDS",(0,1),(-1,-1), [WHITE, LIGHT]),
+    ("GRID",          (0,0),(-1,-1), 0.5, BORDER),
+    ("TOPPADDING",    (0,0),(-1,-1), 8),
+    ("BOTTOMPADDING", (0,0),(-1,-1), 8),
+    ("LEFTPADDING",   (0,0),(-1,-1), 10),
+    ("RIGHTPADDING",  (0,0),(-1,-1), 10),
+    ("VALIGN",        (0,0),(-1,-1), "MIDDLE"),
+]))
+story.append(ct)
+story.append(PageBreak())
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PAGE 5 — Day-by-Day Plan
+# ═══════════════════════════════════════════════════════════════════════════════
+story.append(Paragraph("Day-by-Day Task Breakdown", sH1))
+story.append(hr())
+
+days = [
+    (1, "Project Setup & GitHub Repository", "Yaren", [
+        ("Create GitHub repo", "Yaren creates a new public repository named 'flavor' on GitHub. She goes to Settings > Collaborators and invites Esin, Rana, and Ramiz by their GitHub usernames so everyone can push code."),
+        ("Initialize Django project", "Inside the cloned folder: create a Python virtual environment, activate it, install Django, run pip freeze > requirements.txt to record the dependency, then run django-admin startproject flavor . to create the project structure. The dot at the end is important — it means create the project in the current folder, not in a new subfolder."),
+        ("Create the restaurants app", "Run python manage.py startapp restaurants to generate the app folder. Then open INSTALLED_APPS in settings.py and add 'restaurants' to the list. This tells Django the app exists."),
+        ("Configure settings.py", "Add TEMPLATES DIRS pointing to the templates/ folder, add STATICFILES_DIRS pointing to static/, set LANGUAGE_CODE to en-us and TIME_ZONE to Europe/Istanbul. Create the templates/ and static/css/ folders manually."),
+        ("Set up main urls.py", "Edit flavor/urls.py to include restaurants.urls. This connects the main router to the app's routes. Also create an empty restaurants/urls.py file so Python does not throw an import error."),
+        ("First commit and push", "Stage all files, write a clear commit message, and push to the main branch. All team members then clone the repository."),
+    ]),
+    (2, "Database Models", "Esin", [
+        ("Pull latest code", "Run git pull origin main to get Yaren's setup before starting."),
+        ("Write models.py", "Define four model classes: Category (name field), Location (city + district), Restaurant (name, description, address, phone, price_range, ForeignKey to Category, ForeignKey to Location, created_at), and Review (ForeignKey to Restaurant, author, rating 1-5, text, created_at). Add average_rating() and price_display() helper methods to Restaurant."),
+        ("Run migrations", "Run python manage.py makemigrations to generate the migration file (a Python script that describes the database tables). Then run python manage.py migrate to actually create the tables in db.sqlite3."),
+        ("Commit and push", "Commit models.py and the new migrations/ folder. Never delete migration files — they are the history of database changes."),
+    ]),
+    (3, "Admin Panel + Seed Data", "Rana", [
+        ("Pull latest code", "Run git pull origin main to get Esin's models."),
+        ("Write admin.py", "Register all four models using @admin.register. Configure list_display, list_filter, and search_fields for each model class so the admin panel is easy to navigate."),
+        ("Create superuser", "Run python manage.py createsuperuser and set up the first admin account. The other three team members will be added by running the seed script or through the admin panel."),
+        ("Write seed_acibadem.py", "Create a standalone Python script that uses Django's ORM to insert sample restaurants, categories, locations, and reviews. Use get_or_create() so running the script multiple times does not duplicate data. Run it with python3 seed_acibadem.py."),
+        ("Verify in admin", "Start the server, open /admin/, log in, and confirm that all seeded data appears correctly in each model's list view."),
+        ("Commit and push", "Commit admin.py and seed_acibadem.py."),
+    ]),
+    (4, "Views & URL Routing", "Ramiz", [
+        ("Pull latest code", "Run git pull origin main."),
+        ("Write views.py", "Write five view functions: home() fetches the 6 newest restaurants and all categories. restaurant_list() reads GET parameters (q, category, price) and applies ORM filters. restaurant_detail() fetches one restaurant by pk using get_object_or_404. about() and contact() simply render static pages."),
+        ("Write restaurants/urls.py", "Define five URL patterns with descriptive names: home, restaurant_list, restaurant_detail (with <int:pk>), about, contact. The names are used in templates with {% url 'name' %} to generate links."),
+        ("Test in browser", "Start the server. Even without templates yet, visiting each URL should either show an error about a missing template (good — the view ran) or a TemplateDoesNotExist error — never a URL not found error."),
+        ("Commit and push", "Commit views.py and restaurants/urls.py."),
+    ]),
+    (5, "Base Template & CSS", "Yaren", [
+        ("Pull latest code", "Run git pull origin main."),
+        ("Write base.html", "Create templates/base.html. This file is the master layout. It loads the Inter font from Google Fonts, links the CSS file, and contains the nav bar and footer. The {% block content %}{% endblock %} placeholder is where each page injects its own content. The <main> tag wraps the block so CSS can push the footer to the bottom."),
+        ("Write style.css", "Create static/css/style.css. Define CSS custom properties (variables) at the top inside :root for colors, fonts, spacing, and shadows. Style the nav, hero, cards, filter bar, detail page, footer, and responsive breakpoints. Use display:flex on body and flex:1 on main so the footer always sits at the very bottom."),
+        ("Commit and push", "Commit templates/base.html and static/css/style.css."),
+    ]),
+    (6, "Home & Restaurant List Templates", "Esin", [
+        ("Pull latest code", "Run git pull origin main."),
+        ("Write home.html", "Create templates/home.html. Start with {% extends 'base.html' %}. Inside {% block content %} add the hero section: a label badge, the large YER / Routes heading, a subtitle paragraph, and the search form that submits a GET request with parameter q to the restaurant_list URL."),
+        ("Write list.html", "Create templates/restaurants/list.html (create the restaurants subfolder). Add the category strip at the top (links that filter by category id). Add the filter bar form with category and price dropdowns that auto-submit on change. Loop over restaurants with {% for r in restaurants %} to render restaurant cards. Handle the empty case with {% empty %} or an {% if restaurants %}...{% else %} block."),
+        ("Commit and push", "Commit both template files."),
+    ]),
+    (7, "Detail, About & Contact Templates", "Rana", [
+        ("Pull latest code", "Run git pull origin main."),
+        ("Write detail.html", "Create templates/restaurants/detail.html. Show the breadcrumb navigation, restaurant name, category tag, price tag, description, and an info card with address, city, and phone. Below that add the reviews section with a {% for review in reviews %} loop showing author, date, star rating, and review text. In the sidebar show the average_rating() value."),
+        ("Write about.html", "Create templates/about.html. A simple page with a headline and three feature cards (Discover, Review, Locate) arranged in a CSS grid."),
+        ("Write contact.html", "Create templates/contact.html. A minimal page with the project email and city."),
+        ("Final team test", "All four members pull the latest code, start the server, and test every page. Check that search works, category filters work, clicking a restaurant card opens the detail page, and the admin panel shows all data correctly."),
+        ("Final commit", "One person (Yaren) does a final git pull, then commits any last fixes with message 'Complete Week 8 demo — all templates done' and pushes."),
+    ]),
+]
+
+for day_num, title, member, tasks in days:
+    story.append(day_bar(day_num, title, member))
+    story.append(Spacer(1, 8))
+    for task_title, task_desc in tasks:
+        story.append(Paragraph(f"<b>{task_title}</b>", sH3))
+        story.append(Paragraph(task_desc, sBodyJ))
+    story.append(Spacer(1, 10))
+
 story.append(hr(DARK, 1))
-story.append(Paragraph(
-    "flavor · CSE 220 Web Programming · 7-Day Team Plan  |  Generated 2026",
-    S("foot", fontSize=9, textColor=GRAY, alignment=TA_CENTER)
-))
+story.append(Paragraph("flavor  ·  CSE 220 Web Programming  ·  7-Day Team Plan  ·  Spring 2026", sCenter))
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 doc.build(story)
-print(f"PDF saved to: {OUTPUT}")
+print(f"PDF saved: {OUTPUT}")
